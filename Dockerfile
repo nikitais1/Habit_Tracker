@@ -1,5 +1,5 @@
 #Используем базовый образ Python
-FROM python:alpine
+FROM python:3.12-slim
 
 # Устанавливаем рабочую директорию в контейнере
 WORKDIR /code

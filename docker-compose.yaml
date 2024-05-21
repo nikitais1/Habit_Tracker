@@ -1,32 +1,33 @@
-version: '3'
+version: "3"
 
 services:
 
   db:
     image: postgres:16-alpine
-    restart: on-failure
-    environment:
-      PGDATA: /var/lib/postgresql/data/pgdata
+    container_name: postgres_db
+    restart: always
+    volumes:
+      - pg_data:/var/lib/postgresql/data
     env_file:
       - .env
+    ports:
+      - "5433:5432"
     healthcheck:
       test: [ "CMD-SHELL", "pg_isready -U $POSTGRES_USER" ]
       interval: 5s
       timeout: 5s
       retries: 5
-    volumes:
-      - ./pg_data:/var/lib/postgresql/data/pgdata
-    expose:
-      - "5432"
+
 
   redis:
-    image: redis:alpine
+    image: redis
     restart: on-failure
-    expose:
-      - "6379"
+    ports:
+      - "6379:6379"
 
   app:
     build: .
+    container_name: habit_app
     tty: true
     command: sh -c "python manage.py migrate && python manage.py runserver 0.0.0.0:8000"
     volumes:
@@ -61,9 +62,9 @@ services:
     volumes:
       - .:/code
     depends_on:
+      - db
       - redis
       - app
-      - db
     env_file:
       - .env
 
